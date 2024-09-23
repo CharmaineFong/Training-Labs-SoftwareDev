@@ -21,7 +21,7 @@ services:
     restart: always
     build:
       context: api
-    # image: inventory-api
+    image: inventory-api
     environment:
       - MONGO_URI=mongodb://mongodb:27017/test 
     ports:
@@ -31,7 +31,7 @@ services:
     restart: always
     build:
       context: frontend
-    # image: inventory-frontend
+    image: inventory-frontend
     ports:
       - "3000:3000"
 volumes:
