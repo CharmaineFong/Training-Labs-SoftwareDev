@@ -1,0 +1,13 @@
+name: run-tests
+on: pull_request
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: |
+          pip install -r ./api/requirements.txt
+      - name: Test with pytest
+        run: |
+          pytest
