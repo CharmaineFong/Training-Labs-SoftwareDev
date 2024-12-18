@@ -1,0 +1,58 @@
+# Github Action: In the repo you created for software engineering
+# module where you debugged a mongoDB container connection, create
+# an action to build the frontend and backend containers used by the
+# application. Airview repo for reference:
+# https://github.com/AirWalk-Digital/airview-next/blob/main/.github/workflows/auto-build.yml, and a repo I set up to test in a simpler setup: https://github.com/PAYNEA03/docker-build. Make sure to pay attention to the folder structure, along with the requirement to create a secret in the repo to hold your GitHub token. Use these repos and supporting documentation as a guide. Goal is to get a published frontend/backend docker images stored within the repo
+
+name: Build Frontend and Backed Containers
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-publish:
+    name: Build Frontend and Backend Containers
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        # with:
+        #   repository: ${{ github.github-actions/checkout }}
+
+      - name: Setup Node.js
+        uses: action/setup-node@v3
+        with:
+          node-version: 20.x
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.MY_PERSONAL_GITHUB_TOKEN }}
+
+      - name: Extract Metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            ghcr.io/${{ github.repository }}/frontend
+            ghcr.io/${{ github.repository }}/api
+
+      - name: Build and push Container image - Backend
+        uses: docker/build-push-action@v4
+        with:
+          context: ./api
+          push: true
+          tags: ghcr.io/${{ github.repository }}/api:${{ steps.meta.outputs.tags }}
+
+      - name: Build and push Container image - Frontend
+        uses: docker/build-push-action@v4
+        with:
+          context: ./frontend
+          push: true
+          tags: ghcr.io/${{ github.repository }}/frontend:${{ steps.meta.outputs.tags }}
